@@ -29,7 +29,7 @@
                       <EmptySpace min="-2" pref="105" max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="0" max="-2" attributes="0">
                           <Component id="btnNewRoom" max="32767" attributes="0"/>
-                          <Component id="jButton1" alignment="1" max="32767" attributes="0"/>
+                          <Component id="btnJoinRoom" alignment="1" max="32767" attributes="0"/>
                           <Component id="btnLeaderboard" alignment="1" max="32767" attributes="0"/>
                       </Group>
                       <EmptySpace min="-2" pref="26" max="-2" attributes="0"/>
@@ -40,7 +40,6 @@
                       <Component id="welcomeUser" min="-2" max="-2" attributes="0"/>
                   </Group>
               </Group>
-              <EmptySpace type="separate" max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
                   <Group type="102" alignment="0" attributes="0">
                       <EmptySpace min="-2" pref="89" max="-2" attributes="0"/>
@@ -75,7 +74,7 @@
               <Component id="btnNewRoom" min="-2" max="-2" attributes="0"/>
               <EmptySpace pref="35" max="32767" attributes="0"/>
               <Group type="103" groupAlignment="3" attributes="0">
-                  <Component id="jButton1" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="btnJoinRoom" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="txIdRoom" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="btnJoin" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
@@ -102,12 +101,12 @@
         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnNewRoomActionPerformed"/>
       </Events>
     </Component>
-    <Component class="javax.swing.JButton" name="jButton1">
+    <Component class="javax.swing.JButton" name="btnJoinRoom">
       <Properties>
         <Property name="text" type="java.lang.String" value="Join Room"/>
       </Properties>
       <Events>
-        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jButton1ActionPerformed"/>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnJoinRoomActionPerformed"/>
       </Events>
     </Component>
     <Component class="javax.swing.JTextField" name="txIdRoom">
@@ -116,6 +115,9 @@
       <Properties>
         <Property name="text" type="java.lang.String" value="Join"/>
       </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnJoinActionPerformed"/>
+      </Events>
     </Component>
     <Component class="javax.swing.JButton" name="btnLeaderboard">
       <Properties>

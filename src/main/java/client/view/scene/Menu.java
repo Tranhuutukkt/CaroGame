@@ -5,6 +5,7 @@
 package client.view.scene;
 
 import client.Client;
+import javax.swing.JOptionPane;
 
 
 /**
@@ -12,14 +13,17 @@ import client.Client;
  * @author trantu4120
  */
 public class Menu extends javax.swing.JFrame {
+    String user = Client.socketHandler.getUser();
 
     /**
      * Creates new form Menu
      */
     public Menu() {
         initComponents();
-        this.setTitle("Caro Game - " + Client.socketHandler.getUser());
-        welcomeUser.setText("Hello " + Client.socketHandler.getUser() + "!");
+        this.setTitle("Caro Game - " + user);
+        welcomeUser.setText("Hello " + user + "!");
+        txIdRoom.setVisible(false);
+        btnJoin.setVisible(false);
     }
 
     /**
@@ -34,7 +38,7 @@ public class Menu extends javax.swing.JFrame {
         jLabel1 = new javax.swing.JLabel();
         welcomeUser = new javax.swing.JLabel();
         btnNewRoom = new javax.swing.JButton();
-        jButton1 = new javax.swing.JButton();
+        btnJoinRoom = new javax.swing.JButton();
         txIdRoom = new javax.swing.JTextField();
         btnJoin = new javax.swing.JButton();
         btnLeaderboard = new javax.swing.JButton();
@@ -51,14 +55,19 @@ public class Menu extends javax.swing.JFrame {
             }
         });
 
-        jButton1.setText("Join Room");
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
+        btnJoinRoom.setText("Join Room");
+        btnJoinRoom.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton1ActionPerformed(evt);
+                btnJoinRoomActionPerformed(evt);
             }
         });
 
         btnJoin.setText("Join");
+        btnJoin.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnJoinActionPerformed(evt);
+            }
+        });
 
         btnLeaderboard.setText("Leaderboard");
 
@@ -79,14 +88,13 @@ public class Menu extends javax.swing.JFrame {
                         .addGap(105, 105, 105)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addComponent(btnNewRoom, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jButton1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(btnJoinRoom, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(btnLeaderboard, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addGap(26, 26, 26)
                         .addComponent(txIdRoom, javax.swing.GroupLayout.PREFERRED_SIZE, 85, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(layout.createSequentialGroup()
                         .addGap(37, 37, 37)
                         .addComponent(welcomeUser)))
-                .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
                         .addGap(89, 89, 89)
@@ -112,7 +120,7 @@ public class Menu extends javax.swing.JFrame {
                 .addComponent(btnNewRoom)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 35, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jButton1)
+                    .addComponent(btnJoinRoom)
                     .addComponent(txIdRoom, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(btnJoin))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 50, Short.MAX_VALUE)
@@ -123,17 +131,25 @@ public class Menu extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jButton1ActionPerformed
+    private void btnJoinRoomActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnJoinRoomActionPerformed
+        txIdRoom.setVisible(true);
+        btnJoin.setVisible(true);
+    }//GEN-LAST:event_btnJoinRoomActionPerformed
 
     private void btnNewRoomActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnNewRoomActionPerformed
-        // TODO add your handling code here:
+        Client.socketHandler.createRoom(user);
     }//GEN-LAST:event_btnNewRoomActionPerformed
 
     private void btnLogoutActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLogoutActionPerformed
-        Client.socketHandler.logout();
+        Client.socketHandler.logout(user);
     }//GEN-LAST:event_btnLogoutActionPerformed
+
+    private void btnJoinActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnJoinActionPerformed
+        String roomId = txIdRoom.getText();
+        if (roomId.isEmpty())
+            JOptionPane.showMessageDialog(Client.menuScene, "Room ID is not empty!", "Error", JOptionPane.ERROR_MESSAGE);
+        Client.socketHandler.joinRoom(user, roomId);
+    }//GEN-LAST:event_btnJoinActionPerformed
 
     /**
      * @param args the command line arguments
@@ -172,10 +188,10 @@ public class Menu extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnJoin;
+    private javax.swing.JButton btnJoinRoom;
     private javax.swing.JButton btnLeaderboard;
     private javax.swing.JButton btnLogout;
     private javax.swing.JButton btnNewRoom;
-    private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JTextField txIdRoom;
     private javax.swing.JLabel welcomeUser;

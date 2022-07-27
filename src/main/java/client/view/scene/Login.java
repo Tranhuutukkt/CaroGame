@@ -4,6 +4,7 @@
  */
 package client.view.scene;
 import client.Client;
+import javax.swing.JOptionPane;
 
 /**
  *
@@ -112,8 +113,10 @@ public class Login extends javax.swing.JFrame {
     private void btnLoginActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLoginActionPerformed
         String user = txUser.getText();
         String password = new String(txPassword.getPassword());
-
-        Client.socketHandler.login(user, password);
+        if (user.isEmpty() || password.isEmpty()){
+            JOptionPane.showMessageDialog(Client.loginScene, "Username and password is not empty!", "Error", JOptionPane.ERROR_MESSAGE);
+        }else
+            Client.socketHandler.login(user, password);
     }//GEN-LAST:event_btnLoginActionPerformed
 
     private void btnSignupActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSignupActionPerformed

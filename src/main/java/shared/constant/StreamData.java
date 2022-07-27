@@ -21,6 +21,8 @@ public class StreamData {
         SIGNAL_CREATEUSER, // chức năng đăng ký / thông tin đăng ký / success hoặc failed
         SIGNAL_MENU,      //show menu
         SIGNAL_LOGOUT, // chức năng đăng xuất / không cần dữ liệu thêm / success hoặc failed
+        CREATE_ROOM,  //tao phong
+        JOIN_ROOM,     //vao phong bang ID
         UNKNOW_TYPE,
         NULL,
         EXIT

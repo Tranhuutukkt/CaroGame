@@ -25,6 +25,8 @@ public class SocketHandler {
     BufferedWriter dos;
 
     String user = null; // lưu tài khoản đăng nhập hiện tại
+    String opUser = null; //luu ti khoan doi thu
+    String roomId = null; //luu roomId
     Thread listener = null;
     
     public String connect(String addr, int port) {
@@ -92,11 +94,22 @@ public class SocketHandler {
                         onReceiveLogout();
                         break;
                         
+                    case CREATE_ROOM:
+                        onReceiveCreateRoom(received);
+                        break;
+                    
+                    case JOIN_ROOM:
+                        onReceiveJoinRoom(received);
+                        break;
+                        
                     case NULL:
                         break;
 
                     case EXIT:
                         running = false;
+                        
+                    default:
+                        break;
                 }
 
             } catch (IOException ex) {
@@ -138,7 +151,7 @@ public class SocketHandler {
 
             // chuyển scene
             Client.closeScene(Client.SceneName.LOGIN);
-            Client.openScene(Client.SceneName.CONNECTSERVER);
+            Client.openScene(Client.SceneName.MENU);
         }
     }
     
@@ -148,11 +161,11 @@ public class SocketHandler {
         String status = splitted[1];
 
         // check status
-        if (status.equals("failed")) {
+        if (status.equals("error")) {
             String failedMsg = splitted[2];
-            JOptionPane.showMessageDialog(Client.signupScene, failedMsg, "Lỗi", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(Client.signupScene, failedMsg, "Error", JOptionPane.ERROR_MESSAGE);
 
-        } else if (status.equals("success")) {
+        } else if (status.equals("ok")) {
             JOptionPane.showMessageDialog(Client.signupScene, "Đăng ký thành công", "Thành công", JOptionPane.INFORMATION_MESSAGE);
             Client.closeScene(Client.SceneName.SIGNUP);
             Client.openScene(Client.SceneName.LOGIN);
@@ -166,6 +179,34 @@ public class SocketHandler {
         // chuyển scene
         Client.closeAllScene();
         Client.openScene(Client.SceneName.LOGIN);
+    }
+    
+    private void onReceiveCreateRoom(String received) {
+        String[] splitted = received.split("#");
+        this.roomId = splitted[1];
+
+        // chuyển scene
+        Client.closeAllScene();
+        Client.openScene(Client.SceneName.ROOM);
+    }
+    
+    private void onReceiveJoinRoom(String received) {
+        String[] splitted = received.split("#");
+        String status = splitted[1];
+        
+        // check status
+        if (status.equals("error")) {
+            String failedMsg = splitted[2];
+            JOptionPane.showMessageDialog(Client.menuScene, failedMsg, "Error", JOptionPane.ERROR_MESSAGE);
+
+        } else if (status.equals("ok")) {
+            opUser = (splitted[2].equals(user)) ? splitted[3] : splitted[2];
+            String successMsg = (splitted[2].equals(user)) ? "You" : splitted[2] + "joined the room successfully!";
+            Client.closeAllScene();
+            Client.openScene(Client.SceneName.ROOM);
+            
+            JOptionPane.showMessageDialog(Client.roomScene, successMsg, "Success", JOptionPane.INFORMATION_MESSAGE);
+        }
     }
     
     private void showMenu(String received) {
@@ -192,9 +233,26 @@ public class SocketHandler {
         sendData(data);
     }
     
-    public void logout() {
+    public void logout(String user) {
         // prepare data
-        String data = StreamData.Type.SIGNAL_LOGOUT.name();
+        String data = StreamData.Type.SIGNAL_LOGOUT.name() + "#" + user;
+
+        // send data
+        sendData(data);
+    }
+    
+    public void createRoom(String user) {
+        // prepare data
+        String data = StreamData.Type.CREATE_ROOM.name() + "#" + user;
+
+        // send data
+        sendData(data);
+    }
+    
+    public void joinRoom(String user, String roomId) {
+        this.roomId= roomId;
+        // prepare data
+        String data = StreamData.Type.JOIN_ROOM.name() + "#" + user + "#" + roomId;
 
         // send data
         sendData(data);
@@ -213,6 +271,19 @@ public class SocketHandler {
     }
     
     public String getUser() {
-        return this.user;
+        return user;
+    }
+    
+    public String getOpUser() {
+        return opUser;
+    }
+    
+    public String getRoom() {
+        return roomId;
+    }
+    
+    public String setRoom(String roomId) {
+        this.roomId = roomId;
+        return null;
     }
 }

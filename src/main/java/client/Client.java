@@ -11,6 +11,7 @@ import client.view.scene.ConnectServer;
 import client.view.scene.Login;
 import client.view.scene.Signup;
 import client.view.scene.Menu;
+import client.view.scene.Room;
 
 
 public class Client {
@@ -19,7 +20,8 @@ public class Client {
         CONNECTSERVER,
         LOGIN,
         SIGNUP,
-        MENU
+        MENU,
+        ROOM
     }
 
     // scenes
@@ -27,6 +29,7 @@ public class Client {
     public static Login loginScene;
     public static Signup signupScene;
     public static Menu menuScene;
+    public static Room roomScene;
 
     // controller 
     public static SocketHandler socketHandler;
@@ -42,6 +45,7 @@ public class Client {
         loginScene = new Login();
         signupScene = new Signup();
         menuScene = new Menu();
+        roomScene = new Room();
     }
 
     public static void openScene(SceneName sceneName) {
@@ -65,6 +69,10 @@ public class Client {
                     menuScene = new Menu();
                     menuScene.setVisible(true);
                     break;
+                case ROOM:
+                    roomScene = new Room();
+                    roomScene.setVisible(true);
+                    break;
                 default:
                     break;
             }
@@ -86,6 +94,9 @@ public class Client {
                 case MENU:
                     menuScene.dispose();
                     break;
+                case ROOM:
+                    roomScene.dispose();
+                    break;
                 default:
                     break;
             }
@@ -97,6 +108,7 @@ public class Client {
         loginScene.dispose();
         signupScene.dispose();
         menuScene.dispose();
+        roomScene.dispose();
     }
 
     public static void main(String[] args) {
