@@ -23,6 +23,7 @@ public class StreamData {
         SIGNAL_LOGOUT, // chức năng đăng xuất / không cần dữ liệu thêm / success hoặc failed
         CREATE_ROOM,  //tao phong
         JOIN_ROOM,     //vao phong bang ID
+        GAME_MOVE,      //tao nuoc di
         UNKNOW_TYPE,
         NULL,
         EXIT

@@ -45,7 +45,7 @@ public class ConnectServer extends javax.swing.JFrame {
 
         jLabel3.setText("PORT");
 
-        txIP.setText("192.168.1.117");
+        txIP.setText("192.168.1.74");
         txIP.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 txIPActionPerformed(evt);

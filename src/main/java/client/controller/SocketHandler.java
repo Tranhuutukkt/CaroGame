@@ -87,7 +87,7 @@ public class SocketHandler {
                         break;
                         
                     case SIGNAL_MENU:
-                        showMenu(received);
+                        showMenu();
                         break;
 
                     case SIGNAL_LOGOUT:
@@ -209,7 +209,7 @@ public class SocketHandler {
         }
     }
     
-    private void showMenu(String received) {
+    private void showMenu() {
         // chuyển scene
         Client.openScene(Client.SceneName.MENU);
     }
@@ -256,6 +256,10 @@ public class SocketHandler {
 
         // send data
         sendData(data);
+    }
+    
+    public void move(int x, int y) {
+        sendData(StreamData.Type.GAME_MOVE + "#" + x + "#" + y);
     }
     
     public void sendData(String data) {
