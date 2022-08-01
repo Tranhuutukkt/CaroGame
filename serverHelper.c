@@ -3,6 +3,9 @@
 #include <time.h>
 #include "serverHelper.h"
 
+#define ROW_SIZE 16
+#define COL_SIZE 16
+
 userNode* makeNewUser(userProfile user){
   userNode *newUser = (userNode*)malloc(sizeof(userNode));
   newUser->user=user;
@@ -179,11 +182,49 @@ void logoutUser(char* username){
 /*
 Ghi vào file log
 */
-void writeLog(char* roomId, int col, int row, char* user){
+void writeLog(char* roomId, int col, int row, int* fd){
   FILE* f = fopen(roomId, "a");
-    fprintf(f, "%s-%d-%d\n", user, col, row); //format: user - col - row
+    fprintf(f, "%d %d %d\n", *fd, col, row); //format: user col row
   fclose(f);
 }
+
+/*
+Get move List
+*/
+int* getMoveList(char* roomId){
+  char buf[10];
+  snprintf(buf, sizeof(buf), "%s.txt", roomId);
+  FILE* f = fopen(buf, "r");
+  if(f == NULL){// check file
+    printf("Cannot open file %s.txt!!!\n", buf);
+    return NULL;
+  }
+  static int list[256];
+  int moveCol = 0, moveRow = 0;
+  int i;
+  for (i = 0; i< COL_SIZE*ROW_SIZE; i++) list[i] = -1;
+
+  // for (i = 0; i < COL_SIZE*ROW_SIZE; i++){
+  //   printf("%d ", list[i]);
+  //   if ((i + 1) % COL_SIZE == 0) printf("\n");
+  // }
+  int moveFd = -1;
+  
+  while(!feof(f)){
+    // dinh dang file: user col row
+    fscanf(f, "%d %d %d\n", &moveFd, &moveCol, &moveRow);
+    printf("%d %d %d\n", moveFd, moveCol, moveRow);
+    list[moveRow*COL_SIZE + moveCol] = moveFd;
+    if(feof(f)) break;
+  }
+  // for (i = 0; i < COL_SIZE*ROW_SIZE; i++){
+  //   printf("%d ", list[i]);
+  //   if ((i + 1) % COL_SIZE == 0) printf("\n");
+  // }
+  fclose(f);
+  return list;
+}
+
 
 //roomId
 char* createRoomId(char* username){
@@ -192,7 +233,7 @@ char* createRoomId(char* username){
 	int index = 0;
   static char roomID[6];
 
-	char char1[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+	char char1[] = "abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNOPQRSTUVWXYZ0123456789$@";
 	for(index = 0; index < 6; index++)
 	{
     roomID[index] = char1[rand() % (sizeof char1 - 1)];

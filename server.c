@@ -13,13 +13,13 @@ Library of socket
 #include <errno.h>
 
 #include "linklist.h"
-#include "caroai.h"
 #include "checkinput.h"
-#include "tictactoeRanking.h"
-#include "caroRanking.h"
+#include "caro.h"
 #include "serverHelper.h"
 
 #define BUFF_SIZE 1024
+#define ROW_SIZE 16
+#define COL_SIZE 16
 
 // login
 #define SIGNAL_CHECKLOGIN "SIGNAL_CHECKLOGIN"
@@ -35,11 +35,7 @@ Library of socket
 // caro game
 #define START_GAME "START_GAME"
 #define GAME_MOVE "GAME_MOVE"
-#define SIGNAL_CARO_TURN "SIGNAL_CARO_TURN"
-#define SIGNAL_CARO_WIN "SIGNAL_CARO_WIN"
-#define SIGNAL_CARO_LOST "SIGNAL_CARO_LOST"
-#define SIGNAL_CARO_VIEWLOG "SIGNAL_CARO_VIEWLOG"
-#define SIGNAL_LOGLINE "SIGNAL_LOGLINE"
+#define GAME_WIN "GAME_WIN"
 
 // caro ranking
 #define SIGNAL_CARO_RANKING "SIGNAL_CARO_RANKING"
@@ -173,10 +169,21 @@ int handleDataFromClient(int fd){
     col = atoi(strtok(NULL, token));
     list = checkRoom(roomId);
 
-    writeLog(roomId, col, row, user);
+    char buf[10];
+    snprintf(buf, sizeof(buf), "%s.txt", roomId);
+
+    writeLog(buf, col, row, &fd);
     sprintf(send_msg, "%s#%s#%d#%d\n", GAME_MOVE, user, row, col);
     write(*(list + 0), send_msg, strlen(send_msg));
     write(*(list + 1), send_msg, strlen(send_msg));
+
+    moveList = getMoveList(roomId);
+    int isWin = checkWin(moveList, &fd, col, row);
+    if (isWin == 1){
+      sprintf(send_msg, "%s#%s\n", GAME_WIN, user);
+      write(*(list + 0), send_msg, strlen(send_msg));
+      write(*(list + 1), send_msg, strlen(send_msg));
+    }
   }
   
 }

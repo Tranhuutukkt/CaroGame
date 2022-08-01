@@ -57,7 +57,12 @@ void logoutUser(char* username);
 /*
 Ghi vào file log
 */
-void writeLog(char* roomId, int col, int row, char* user);
+void writeLog(char* roomId, int col, int row, int* fd);
+
+/*
+Get move List
+*/
+int* getMoveList(char* roomId);
 
 //roomId
 char* createRoomId(char* username);
