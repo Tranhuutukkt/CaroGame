@@ -23,6 +23,7 @@ public class StreamData {
         SIGNAL_LOGOUT, // chức năng đăng xuất / không cần dữ liệu thêm / success hoặc failed
         CREATE_ROOM,  //tao phong
         JOIN_ROOM,     //vao phong bang ID
+        START_GAME,     //bat dau tro choi
         GAME_MOVE,      //tao nuoc di
         UNKNOW_TYPE,
         NULL,
@@ -45,8 +46,6 @@ public class StreamData {
     
     public static Type getTypeFromData(String data) {
         String typeStr = data.split("#")[0].trim();
-        System.out.println("data: " + Arrays.toString(data.getBytes()) + "abc");
-        System.out.println("opcode: " + Arrays.toString(StreamData.Type.SIGNAL_CHECKLOGIN.name().getBytes()) + "abc");
         return getType(typeStr);
     }
 }
