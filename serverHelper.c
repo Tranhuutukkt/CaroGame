@@ -179,12 +179,9 @@ void logoutUser(char* username){
 /*
 Ghi vào file log
 */
-void writeLog(char* logFile, int col, int row, int isPlayer){
-  FILE* f = fopen(logFile, "a");
-  if(isPlayer)
-    fprintf(f, "You: column:%d - row:%d\n", col, row);
-  else
-    fprintf(f, "Compputer: column:%d - row:%d\n", col, row);
+void writeLog(char* roomId, int col, int row, char* user){
+  FILE* f = fopen(roomId, "a");
+    fprintf(f, "%s-%d-%d\n", user, col, row); //format: user - col - row
   fclose(f);
 }
 

@@ -57,7 +57,7 @@ void logoutUser(char* username);
 /*
 Ghi vào file log
 */
-void writeLog(char* logFile, int col, int row, int isPlayer);
+void writeLog(char* roomId, int col, int row, char* user);
 
 //roomId
 char* createRoomId(char* username);

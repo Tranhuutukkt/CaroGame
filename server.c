@@ -21,13 +21,11 @@ Library of socket
 
 #define BUFF_SIZE 1024
 
-// fungame
+// login
 #define SIGNAL_CHECKLOGIN "SIGNAL_CHECKLOGIN"
 #define SIGNAL_CREATEUSER "SIGNAL_CREATEUSER"
 #define SIGNAL_LOGOUT "SIGNAL_LOGOUT"
-#define SIGNAL_OK "SIGNAL_OK"
 #define SIGNAL_MENU "SIGNAL_MENU"
-#define SIGNAL_ERROR "SIGNAL_ERROR" 
 #define SIGNAL_CLOSE "SIGNAL_CLOSE"
 
 //room
@@ -35,8 +33,8 @@ Library of socket
 #define JOIN_ROOM "JOIN_ROOM"
 
 // caro game
-#define SIGNAL_CARO_NEWGAME "SIGNAL_CARO_NEWGAME"
-#define SIGNAL_CARO_ABORTGAME "SIGNAL_CARO_ABORTGAME"
+#define START_GAME "START_GAME"
+#define GAME_MOVE "GAME_MOVE"
 #define SIGNAL_CARO_TURN "SIGNAL_CARO_TURN"
 #define SIGNAL_CARO_WIN "SIGNAL_CARO_WIN"
 #define SIGNAL_CARO_LOST "SIGNAL_CARO_LOST"
@@ -139,7 +137,6 @@ int handleDataFromClient(int fd){
     user = strtok(NULL, token);
     roomId = strtok(NULL, token);
     list = checkRoom(roomId);
-    printf("%d-%d\n", *(list), *(list + 1));
 
     if ( *(list)== 0 || *(list + 1) != 0){
       sprintf( send_msg,"%s#%s#%s\n", JOIN_ROOM, "error", "This room is not avaiable!");
@@ -149,18 +146,38 @@ int handleDataFromClient(int fd){
     {
       userNode* p = findUserByFd(*(list));
       char* opUser = p->user.username;
-      printf("%s\n", opUser);
       saveRoom(user, roomId);
       sprintf( send_msg,"%s#%s#%s#%s\n", JOIN_ROOM, "ok", user, opUser);
       list = checkRoom(roomId);
-      printf("%d-%d\n", *(list + 0), *(list + 1));
       write(*(list + 0), send_msg, strlen(send_msg));
       write(*(list + 1), send_msg, strlen(send_msg));
     }
 
     printf("Send message: %sabc\n", send_msg);
   }
-  
+  else if (strcmp(str, START_GAME) == 0)
+  {
+    user = strtok(NULL, token);
+    roomId = strtok(NULL, token);
+    list = checkRoom(roomId);
+    
+    sprintf( send_msg,"%s#%s\n", START_GAME, user);
+    write(*(list + 0), send_msg, strlen(send_msg));
+    write(*(list + 1), send_msg, strlen(send_msg));
+  }
+  else if (strcmp(str, GAME_MOVE) == 0)
+  {
+    roomId = strtok(NULL, token);
+    user = strtok(NULL, token);
+    row = atoi(strtok(NULL, token));
+    col = atoi(strtok(NULL, token));
+    list = checkRoom(roomId);
+
+    writeLog(roomId, col, row, user);
+    sprintf(send_msg, "%s#%s#%d#%d\n", GAME_MOVE, user, row, col);
+    write(*(list + 0), send_msg, strlen(send_msg));
+    write(*(list + 1), send_msg, strlen(send_msg));
+  }
   
 }
 
@@ -230,10 +247,10 @@ int main(int argc, char *argv[]){
       perror("select() error!\n");
       exit(-6);
     }
-    else if (rc == 0){
-     printf("  select() timed out. End program.\n");
-     exit(-5);
-    }
+    // else if (rc == 0){
+    //  printf("  select() timed out. End program.\n");
+    //  exit(-5);
+    // }
     for(i = 0; i <= fdmax; i++){
       if(FD_ISSET(i, &read_fds)){
         if(i == sock){
