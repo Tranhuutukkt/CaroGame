@@ -10,6 +10,7 @@ import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JOptionPane;
 
 /**
  *
@@ -18,6 +19,8 @@ import javax.swing.JButton;
 public class Room extends javax.swing.JFrame {
     ImageIcon userIcon;
     ImageIcon opUserIcon;
+    ImageIcon userIconLastMove;
+    ImageIcon opUserIconLastMove;
     
     String user = Client.socketHandler.getUser();
     String opUser = Client.socketHandler.getOpUser();
@@ -47,10 +50,14 @@ public class Room extends javax.swing.JFrame {
             if (userSymbol.equals("x")){
                 userIcon = new ImageIcon("src/main/java/img/cancel.png");
                 opUserIcon = new ImageIcon("src/main/java/img/circle.png");
+                userIconLastMove = new ImageIcon("src/main/java/img/cancel-lastmove.png");
+                opUserIconLastMove = new ImageIcon("src/main/java/img/circle-lastmove.png");
             }
             else {
                 opUserIcon = new ImageIcon("src/main/java/img/cancel.png");
                 userIcon = new ImageIcon("src/main/java/img/circle.png");
+                opUserIconLastMove = new ImageIcon("src/main/java/img/cancel-lastmove.png");
+                userIconLastMove = new ImageIcon("src/main/java/img/circle-lastmove.png");
             }
         }
         
@@ -73,8 +80,8 @@ public class Room extends javax.swing.JFrame {
 
         for (int row = 0; row < ROW; row++) {
             for (int column = 0; column < COLUMN; column++) {
-                btnOnBoard[row][column] = this.createBoardButton(row, column);
-                boardGamePane.add(btnOnBoard[row][column]);
+                btnOnBoard[column][row] = this.createBoardButton(row, column);
+                boardGamePane.add(btnOnBoard[column][row]);
             }
         }
         boardGamePane.setEnabled(false);
@@ -120,9 +127,9 @@ public class Room extends javax.swing.JFrame {
     public void setAllBoardButtonEnabled(boolean x){
         for (int row = 0; row < ROW; row++) {
             for (int column = 0; column < COLUMN; column++) {
-                if (btnOnBoard[row][column].getIcon() != null)
-                    btnOnBoard[row][column].setEnabled(false);
-                else btnOnBoard[row][column].setEnabled(x);
+                if (btnOnBoard[column][row].getIcon() != null)
+                    btnOnBoard[column][row].setEnabled(false);
+                else btnOnBoard[column][row].setEnabled(x);
             }
         }
     }
@@ -154,22 +161,29 @@ public class Room extends javax.swing.JFrame {
     
     public void addPoint(int row, int column, String user) {
         if (lastMove != null) {
-            lastMove.setBackground(new Color(180, 180, 180));
+            lastMove.setIcon(user.equals(this.user) ? opUserIcon : userIcon);
+            lastMove.setDisabledIcon(user.equals(this.user) ? opUserIcon : userIcon);
         }
 
-        lastMove = btnOnBoard[row][column];
-        lastMove.setBackground(Color.yellow);
+        lastMove = btnOnBoard[column][row];
         lastMove.setActionCommand(user); // save user as state
 
         if (user.equals(this.user)) {
-            lastMove.setIcon(userIcon);
-            lastMove.setDisabledIcon(userIcon);
+            lastMove.setIcon(userIconLastMove);
+            lastMove.setDisabledIcon(userIconLastMove);
         } else {
-            lastMove.setIcon(opUserIcon);
-            lastMove.setDisabledIcon(opUserIcon);
+            lastMove.setIcon(opUserIconLastMove);
+            lastMove.setDisabledIcon(opUserIconLastMove);
         }
         this.setTurnAfterMove();
         this.setAllBoardButtonEnabled(turn);
+    }
+    
+    public void setWin(String user){
+        if (!user.equals(this.user)) {
+            if (user.equals(this.opUser))
+                JOptionPane.showMessageDialog(this, "YOU LOSE.", "Lose", JOptionPane.INFORMATION_MESSAGE);
+        } else JOptionPane.showMessageDialog(this, "YOU WIN!", "Win", JOptionPane.INFORMATION_MESSAGE);
     }
 
     /**

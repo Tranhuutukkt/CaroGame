@@ -110,6 +110,10 @@ public class SocketHandler {
                         onReceiveGameMove(received);
                         break;
                         
+                    case GAME_WIN:
+                        onReceiveGameWin(received);
+                        break;
+                        
                     case NULL:
                         break;
 
@@ -234,6 +238,11 @@ public class SocketHandler {
         int column = Integer.parseInt(splitted[3]);
         Client.roomScene.addPoint(row, column, splitted[1]);
         
+    }
+    
+    private void onReceiveGameWin(String received){
+        String[] splitted = received.split("#");
+        Client.roomScene.setWin(splitted[1]);
     }
     
     private void showMenu() {

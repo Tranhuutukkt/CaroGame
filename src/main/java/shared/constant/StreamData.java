@@ -25,6 +25,7 @@ public class StreamData {
         JOIN_ROOM,     //vao phong bang ID
         START_GAME,     //bat dau tro choi
         GAME_MOVE,      //tao nuoc di
+        GAME_WIN,       //thong bao nguoi thang
         UNKNOW_TYPE,
         NULL,
         EXIT
