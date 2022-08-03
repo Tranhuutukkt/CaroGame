@@ -59,12 +59,6 @@ public class Room extends javax.swing.JFrame {
         
         txtChat.setEditable(false);
         
-        doc = txtChat.getStyledDocument();
-        //  Define the attribute you want for the line of text
-        StyleConstants.setAlignment(center, StyleConstants.ALIGN_CENTER);
-        StyleConstants.setAlignment(left, StyleConstants.ALIGN_LEFT);
-        StyleConstants.setAlignment(right, StyleConstants.ALIGN_RIGHT);
-        
         // close window event
         this.addWindowListener(new java.awt.event.WindowAdapter() {
             @Override
@@ -274,6 +268,11 @@ public class Room extends javax.swing.JFrame {
     
     public void addChat(String[] data){
         String dataUser = data[1];
+        doc = txtChat.getStyledDocument();
+        //  Define the attribute you want for the line of text
+        StyleConstants.setAlignment(center, StyleConstants.ALIGN_CENTER);
+        StyleConstants.setAlignment(left, StyleConstants.ALIGN_LEFT);
+        StyleConstants.setAlignment(right, StyleConstants.ALIGN_RIGHT);
         try
         {
             int length = doc.getLength();
@@ -281,9 +280,9 @@ public class Room extends javax.swing.JFrame {
             if (dataUser.equals(this.user))
                 doc.setParagraphAttributes(length+1, 1, right, false);
             else if (dataUser.equals("SYSTEM"))
-                doc.setParagraphAttributes(length+1, 1, right, false);
+                doc.setParagraphAttributes(length+1, 1, center, false);
             else
-                doc.setParagraphAttributes(length+1, 1, right, false);
+                doc.setParagraphAttributes(length+1, 1, left, false);
         }
         catch(BadLocationException e) { System.out.println(e);}
     }
