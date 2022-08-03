@@ -49,7 +49,8 @@ userNode* findUserByFd(int fd){ // tim user dua theo fd
 
 int* checkRoom(char* roomId){ //kiem tra xem phong con slot hay khong
   userNode* p;
-  static int list[2] = {0, 0};
+  static int list[2];
+  list[0] = 0; list[1] = 0;
   int count = 0;
   for ( p = userRoot; p!= NULL; p = p->next ){
     if (strcmp(roomId, p->user.roomId) == 0)
@@ -192,7 +193,7 @@ void writeLog(char* roomId, int col, int row, int* fd){
 Get move List
 */
 int* getMoveList(char* roomId){
-  char buf[10];
+  char buf[11];
   snprintf(buf, sizeof(buf), "%s.txt", roomId);
   FILE* f = fopen(buf, "r");
   if(f == NULL){// check file
@@ -247,6 +248,12 @@ char* createRoomId(char* username){
 //save room
 void saveRoom(char* username, char* roomId){
   userNode* p = findUser(username);
-  strcpy(p->user.roomId, roomId);
+  if (roomId == NULL){
+    p->user.roomId == NULL;
+  }
+  else{
+    strcpy(p->user.roomId, roomId);
+  }
+  
   updateUserProfile();
 }

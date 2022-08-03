@@ -7,7 +7,8 @@
 #define COL_SIZE 16
 
 int* moveList;
-char* winMoveList;
+int winList[5];
+int* winMoveList = winList;
 
 int getCell(int col, int row){
     if(col < 0 || col >= COL_SIZE)
@@ -26,12 +27,14 @@ int checkWin(int* moveList, int* fd, int col, int row){
     //kiem tra hang
     while (getCell(cot, row) == getCell(col, row))
     {
+        *(winMoveList + check) = row * COL_SIZE + cot;
         check++;
         cot++;
     }
     cot = col - 1;
     while (getCell(cot, row) == getCell(col, row))
     {
+        *(winMoveList + check) = row * COL_SIZE + cot;
         check++;
         cot--;
     }
@@ -41,12 +44,14 @@ int checkWin(int* moveList, int* fd, int col, int row){
     check = 0; hang = row;
     while (getCell(col, hang) == getCell(col, row))
     {
+        *(winMoveList + check) = hang * COL_SIZE + col;
         check++;
         hang++;
     }
     hang = row - 1;
     while (getCell(col, hang) == getCell(col, row))
     {
+        *(winMoveList + check) = hang * COL_SIZE + col;
         check++;
         hang--;
     }
@@ -56,6 +61,7 @@ int checkWin(int* moveList, int* fd, int col, int row){
     hang = row; cot = col; check = 0;
     while (getCell(cot, hang) == getCell(col, row))
     {
+        *(winMoveList + check) = hang * COL_SIZE + cot;
         check++;
         hang++;
         cot++;
@@ -63,6 +69,7 @@ int checkWin(int* moveList, int* fd, int col, int row){
     hang = row - 1; cot = col - 1;
     while (getCell(cot, hang) == getCell(col, row))
     {
+        *(winMoveList + check) = hang * COL_SIZE + cot;
         check++;
         hang--;
         cot--;
@@ -73,6 +80,7 @@ int checkWin(int* moveList, int* fd, int col, int row){
     hang = row; cot = col; check = 0;
     while (getCell(cot, hang) == getCell(col, row))
     {
+        *(winMoveList + check) = hang * COL_SIZE + cot;
         check++;
         hang++;
         cot--;
@@ -80,6 +88,7 @@ int checkWin(int* moveList, int* fd, int col, int row){
     hang = row - 1; cot = col - 1;
     while (getCell(cot, hang) == getCell(col, row))
     {
+        *(winMoveList + check) = hang * COL_SIZE + cot;
         check++;
         hang--;
         cot++;

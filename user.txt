@@ -1,2 +1,2 @@
-abc#123#5#nQSz5N
-qwe#123#6#nQSz5N
+abc#123#-1#null
+qwe#123#-1#null

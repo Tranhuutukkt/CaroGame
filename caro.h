@@ -4,6 +4,8 @@
 #define ROW_SIZE 16
 #define COL_SIZE 16
 int* moveList;
+int winList[5];
+int* winMoveList;
 
 int getCell(int col, int row);
 

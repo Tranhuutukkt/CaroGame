@@ -21,16 +21,20 @@ Library of socket
 #define ROW_SIZE 16
 #define COL_SIZE 16
 
+//connect
+#define SIGNAL_OK "SIGNAL_OK"
+#define SIGNAL_CLOSE "SIGNAL_CLOSE"
+
 // login
 #define SIGNAL_CHECKLOGIN "SIGNAL_CHECKLOGIN"
 #define SIGNAL_CREATEUSER "SIGNAL_CREATEUSER"
 #define SIGNAL_LOGOUT "SIGNAL_LOGOUT"
 #define SIGNAL_MENU "SIGNAL_MENU"
-#define SIGNAL_CLOSE "SIGNAL_CLOSE"
 
 //room
 #define CREATE_ROOM "CREATE_ROOM"
 #define JOIN_ROOM "JOIN_ROOM"
+#define LEAVE_ROOM "LEAVE_ROOM"
 
 // caro game
 #define START_GAME "START_GAME"
@@ -70,11 +74,15 @@ int handleDataFromClient(int fd){
   recieved = recv( fd, recv_msg, BUFF_SIZE, 0);
   recv_msg[recieved] = '\0';
   
-  printf("%sabc\n", recv_msg);
+  printf("%s|\n", recv_msg);
   str = strtok( recv_msg, token);
   if( strcmp(str, SIGNAL_CLOSE) == 0){
     FD_CLR(fd, &master); // Clears the bit for the file descriptor fd in the file descriptor set fdset.
     printf("Close connection from fd = %d\n", fd );    
+  }
+  else if (strcmp(str, SIGNAL_OK) == 0)
+  {
+    printf("Connect with fd = %d successfully!\n", fd);
   }
   else if(strcmp(str, SIGNAL_CREATEUSER) == 0){
     printf("%s\n", str);
@@ -89,7 +97,7 @@ int handleDataFromClient(int fd){
     }
 
     write( fd, send_msg, strlen(send_msg));
-    printf("Send message: %sabc\n", send_msg);
+    printf("Send message: %s|\n", send_msg);
   }
   else if( strcmp(str, SIGNAL_CHECKLOGIN) == 0){  
     // str = strtok( recv_msg, token); 
@@ -99,13 +107,19 @@ int handleDataFromClient(int fd){
     pass = strtok(NULL, token);
     printf("%s%sabc\n", user, pass);
     if(isValid(user, pass)){
-      loginUser(user, &fd);
-      sprintf( send_msg,"%s#%s#%s\n", SIGNAL_CHECKLOGIN, "ok", user);
+      userNode* p = findUser(user);
+      if (p->user.fd != -1){
+        sprintf( send_msg,"%s#%s#%s\n", SIGNAL_CHECKLOGIN, "error", "This user is online now!");
+      }
+      else{
+        loginUser(user, &fd);
+        sprintf( send_msg,"%s#%s#%s\n", SIGNAL_CHECKLOGIN, "ok", user);
+      }
     }
-    else sprintf( send_msg,"%s#%s#%s\n", SIGNAL_CHECKLOGIN, "error", "Username or Password is incorrect");
+    else sprintf( send_msg,"%s#%s#%s\n", SIGNAL_CHECKLOGIN, "error", "Username or Password is incorrect!");
     // while(1); // test timeout
     send(fd, send_msg, strlen(send_msg), 0);
-    printf("Send message: %sabc\n", send_msg);
+    printf("Send message: %s|\n", send_msg);
   }
   else if (strcmp(str, SIGNAL_LOGOUT) == 0){
     // str = strtok( recv_msg, token); 
@@ -115,7 +129,7 @@ int handleDataFromClient(int fd){
     logoutUser(user);
     sprintf( send_msg,"%s\n", SIGNAL_LOGOUT);
     write(fd, send_msg, strlen(send_msg));
-    printf("Send message: %sabc\n", send_msg);
+    printf("Send message: %s|\n", send_msg);
   }
   else if (strcmp(str, CREATE_ROOM) == 0)
   {
@@ -125,7 +139,7 @@ int handleDataFromClient(int fd){
     char* roomID = createRoomId(user);
     sprintf( send_msg,"%s#%s\n", CREATE_ROOM, roomID);
     write(fd, send_msg, strlen(send_msg));
-    printf("Send message: %sabc\n", send_msg);
+    printf("Send message: %s|\n", send_msg);
   }
   else if (strcmp(str, JOIN_ROOM) == 0)
   {
@@ -149,8 +163,30 @@ int handleDataFromClient(int fd){
       write(*(list + 1), send_msg, strlen(send_msg));
     }
 
-    printf("Send message: %sabc\n", send_msg);
+    printf("Send message: %s|\n", send_msg);
   }
+  else if (strcmp(str, LEAVE_ROOM) == 0)
+  {
+    printf("%s\n", str);
+    user = strtok(NULL, token);
+    roomId = strtok(NULL, token);
+    //send message
+    list = checkRoom(roomId);
+    sprintf( send_msg,"%s#%s\n", LEAVE_ROOM, user);
+    if (*(list) != -1) write(*(list + 0), send_msg, strlen(send_msg));
+    if (*(list + 1) != -1) write(*(list + 1), send_msg, strlen(send_msg));
+
+    //update Room
+    saveRoom(user, "null");
+    list = checkRoom(roomId);
+    if (*(list) == 0){
+      char buf[11];
+      snprintf(buf, sizeof(buf), "%s.txt", roomId);
+      remove(buf);
+    }
+    printf("Send message: %s|\n", send_msg);
+  }
+  
   else if (strcmp(str, START_GAME) == 0)
   {
     user = strtok(NULL, token);
@@ -169,7 +205,7 @@ int handleDataFromClient(int fd){
     col = atoi(strtok(NULL, token));
     list = checkRoom(roomId);
 
-    char buf[10];
+    char buf[11];
     snprintf(buf, sizeof(buf), "%s.txt", roomId);
 
     writeLog(buf, col, row, &fd);
@@ -180,7 +216,7 @@ int handleDataFromClient(int fd){
     moveList = getMoveList(roomId);
     int isWin = checkWin(moveList, &fd, col, row);
     if (isWin == 1){
-      sprintf(send_msg, "%s#%s\n", GAME_WIN, user);
+      sprintf(send_msg, "%s#%s#%d#%d#%d#%d#%d\n", GAME_WIN, user, *(winMoveList), *(winMoveList + 1), *(winMoveList + 2), *(winMoveList + 3), *(winMoveList + 4));
       write(*(list + 0), send_msg, strlen(send_msg));
       write(*(list + 1), send_msg, strlen(send_msg));
     }
