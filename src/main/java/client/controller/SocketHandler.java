@@ -118,6 +118,9 @@ public class SocketHandler {
                         onReceiveGameWin(received);
                         break;
                         
+                    case CHAT:
+                        onReceiveChat(received);
+                        
                     case NULL:
                         break;
 
@@ -262,6 +265,11 @@ public class SocketHandler {
         Client.roomScene.setWin(splitted);
     }
     
+    private void onReceiveChat(String received){
+        String[] splitted = received.split("#");
+        Client.roomScene.addChat(splitted);
+    }
+    
     private void showMenu() {
         // chuyển scene
         Client.openScene(Client.SceneName.MENU);
@@ -323,6 +331,10 @@ public class SocketHandler {
     
     public void move(int row, int column, String user) {
         sendData(StreamData.Type.GAME_MOVE.name() + "#" + roomId + "#" + user +"#" + row + "#" + column);
+    }
+    
+    public void sendChat(String message, String user, String roomId){
+        sendData(StreamData.Type.CHAT.name() + "#" + user + "#" + roomId + "#" + message);
     }
     
     public void close(){

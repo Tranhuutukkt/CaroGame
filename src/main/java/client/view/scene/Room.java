@@ -6,11 +6,19 @@ package client.view.scene;
 import client.Client;
 import java.awt.Color;
 import java.awt.GridLayout;
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.SimpleAttributeSet;
+import javax.swing.text.StyleConstants;
+import javax.swing.text.StyledDocument;
 
 /**
  *
@@ -27,6 +35,10 @@ public class Room extends javax.swing.JFrame {
     String roomID = Client.socketHandler.getRoom();
     String userSymbol;
     
+    StyledDocument doc;
+    SimpleAttributeSet center = new SimpleAttributeSet();
+    SimpleAttributeSet left = new SimpleAttributeSet();
+    SimpleAttributeSet right = new SimpleAttributeSet();
     
     final int COLUMN = 16, ROW = 16;
     boolean turn = false; //false: wait, true: your turn
@@ -46,6 +58,12 @@ public class Room extends javax.swing.JFrame {
         username.setText(user); 
         
         txtChat.setEditable(false);
+        
+        doc = txtChat.getStyledDocument();
+        //  Define the attribute you want for the line of text
+        StyleConstants.setAlignment(center, StyleConstants.ALIGN_CENTER);
+        StyleConstants.setAlignment(left, StyleConstants.ALIGN_LEFT);
+        StyleConstants.setAlignment(right, StyleConstants.ALIGN_RIGHT);
         
         // close window event
         this.addWindowListener(new java.awt.event.WindowAdapter() {
@@ -195,12 +213,6 @@ public class Room extends javax.swing.JFrame {
     
     public void setWin(String[] data){
         String dataUser = data[1];
-        if (!dataUser.equals(this.user)) {
-            if (dataUser.equals(this.opUser)){
-                JOptionPane.showMessageDialog(this, "YOU LOSE.", "Lose", JOptionPane.INFORMATION_MESSAGE);
-            }
-                JOptionPane.showMessageDialog(this, "YOU LOSE.", "Lose", JOptionPane.INFORMATION_MESSAGE);
-        } else JOptionPane.showMessageDialog(this, "YOU WIN!", "Win", JOptionPane.INFORMATION_MESSAGE);
         
         for (int i = 2; i <= 6; i++){
             int cell = Integer.parseInt(data[i]);
@@ -208,6 +220,14 @@ public class Room extends javax.swing.JFrame {
             int row = cell / COLUMN;
             this.btnOnBoard[col][row].setDisabledIcon(dataUser.equals(this.user) ? userIconLastMove : opUserIconLastMove);
         }
+        
+        if (!dataUser.equals(this.user)) {
+            if (dataUser.equals(this.opUser)){
+                JOptionPane.showMessageDialog(this, "YOU LOSE.", "Lose", JOptionPane.INFORMATION_MESSAGE);
+            }
+                JOptionPane.showMessageDialog(this, "YOU LOSE.", "Lose", JOptionPane.INFORMATION_MESSAGE);
+        } else JOptionPane.showMessageDialog(this, "YOU WIN!", "Win", JOptionPane.INFORMATION_MESSAGE);
+        
         btnStartNewGame.setVisible(true);
         this.setAllBoardButtonEnabled(false);
         this.setStatusGame(false);
@@ -248,8 +268,24 @@ public class Room extends javax.swing.JFrame {
             this.setOpUser();
             opUsername.setText(opUser);
             btnStartNewGame.setEnabled(false);
-            JOptionPane.showMessageDialog(Client.menuScene, dataUser + " have left the room successfully!", "OK", JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(Client.menuScene, dataUser + " have left the room!", "OK", JOptionPane.INFORMATION_MESSAGE);
         }
+    }
+    
+    public void addChat(String[] data){
+        String dataUser = data[1];
+        try
+        {
+            int length = doc.getLength();
+            doc.insertString(doc.getLength(), "\n" + data[2], null);
+            if (dataUser.equals(this.user))
+                doc.setParagraphAttributes(length+1, 1, right, false);
+            else if (dataUser.equals("SYSTEM"))
+                doc.setParagraphAttributes(length+1, 1, right, false);
+            else
+                doc.setParagraphAttributes(length+1, 1, right, false);
+        }
+        catch(BadLocationException e) { System.out.println(e);}
     }
 
     /**
@@ -272,12 +308,13 @@ public class Room extends javax.swing.JFrame {
         jScrollPane2 = new javax.swing.JScrollPane();
         txtChat = new javax.swing.JTextPane();
         txChatMessage = new javax.swing.JTextField();
-        jButton1 = new javax.swing.JButton();
+        btnSend = new javax.swing.JButton();
         btnEndRoom = new javax.swing.JButton();
         lbUserSymbol = new javax.swing.JLabel();
         lbOpUserSymbol = new javax.swing.JLabel();
         btnStartNewGame = new javax.swing.JButton();
         timeLabel = new javax.swing.JLabel();
+        jButton1 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -297,11 +334,22 @@ public class Room extends javax.swing.JFrame {
 
         jScrollPane2.setViewportView(txtChat);
 
-        jButton1.setFont(new java.awt.Font("Liberation Sans", 0, 12)); // NOI18N
-        jButton1.setText("SEND");
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
+        txChatMessage.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                txChatMessageKeyPressed(evt);
+            }
+        });
+
+        btnSend.setFont(new java.awt.Font("Liberation Sans", 0, 12)); // NOI18N
+        btnSend.setText("SEND");
+        btnSend.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                btnSendMouseClicked(evt);
+            }
+        });
+        btnSend.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton1ActionPerformed(evt);
+                btnSendActionPerformed(evt);
             }
         });
 
@@ -318,7 +366,7 @@ public class Room extends javax.swing.JFrame {
                     .addGroup(chatPaneLayout.createSequentialGroup()
                         .addComponent(txChatMessage, javax.swing.GroupLayout.PREFERRED_SIZE, 242, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 61, Short.MAX_VALUE)
+                        .addComponent(btnSend, javax.swing.GroupLayout.PREFERRED_SIZE, 61, Short.MAX_VALUE)
                         .addGap(12, 12, 12))))
         );
         chatPaneLayout.setVerticalGroup(
@@ -329,7 +377,7 @@ public class Room extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(chatPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(txChatMessage, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(btnSend, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(19, 19, 19))
         );
 
@@ -349,6 +397,13 @@ public class Room extends javax.swing.JFrame {
 
         timeLabel.setFont(new java.awt.Font("Liberation Sans", 1, 36)); // NOI18N
         timeLabel.setText("Time");
+
+        jButton1.setText("Copy");
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -370,11 +425,18 @@ public class Room extends javax.swing.JFrame {
                         .addContainerGap(98, Short.MAX_VALUE))
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jLabel1)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(roomId, javax.swing.GroupLayout.PREFERRED_SIZE, 138, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(btnEndRoom)
-                        .addGap(35, 35, 35))
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 875, Short.MAX_VALUE)
+                                .addComponent(btnEndRoom)
+                                .addGap(35, 35, 35))
+                            .addGroup(layout.createSequentialGroup()
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(roomId, javax.swing.GroupLayout.PREFERRED_SIZE, 73, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(jButton1)
+                                .addGap(0, 0, Short.MAX_VALUE)))
+                        .addGap(109, 109, 109))
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(layout.createSequentialGroup()
@@ -399,7 +461,8 @@ public class Room extends javax.swing.JFrame {
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel1)
-                            .addComponent(roomId, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(roomId, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jButton1))
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(btnEndRoom)
                             .addGroup(layout.createSequentialGroup()
@@ -430,16 +493,48 @@ public class Room extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnEndRoomActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEndRoomActionPerformed
-    
+        if (statusGame){
+            JOptionPane.showMessageDialog(Room.this, "You can't exit while playing a game!", "Unable", JOptionPane.INFORMATION_MESSAGE);
+        }
+        else {
+            if (JOptionPane.showConfirmDialog(Room.this,
+                "This action will let you leave this room!", "Are you sure?",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.QUESTION_MESSAGE) == JOptionPane.YES_OPTION)
+            {
+                Client.socketHandler.leaveRoom(user);
+            }
+        }
     }//GEN-LAST:event_btnEndRoomActionPerformed
 
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+    private void btnSendActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSendActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_jButton1ActionPerformed
+    }//GEN-LAST:event_btnSendActionPerformed
 
     private void btnStartNewGameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnStartNewGameActionPerformed
         Client.socketHandler.startGame(user);
     }//GEN-LAST:event_btnStartNewGameActionPerformed
+
+    private void txChatMessageKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txChatMessageKeyPressed
+        if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
+            btnSendMouseClicked(null);
+        }
+    }//GEN-LAST:event_txChatMessageKeyPressed
+
+    private void btnSendMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnSendMouseClicked
+        String chatMsg = txChatMessage.getText();
+        txChatMessage.setText("");
+
+        if (!chatMsg.equals("")) {
+            Client.socketHandler.sendChat(chatMsg, user, roomID);
+        }
+    }//GEN-LAST:event_btnSendMouseClicked
+
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        StringSelection stringSelection = new StringSelection (roomId.getText());
+        Clipboard clpbrd = Toolkit.getDefaultToolkit ().getSystemClipboard ();
+        clpbrd.setContents (stringSelection, null);
+    }//GEN-LAST:event_jButton1ActionPerformed
 
     /**
      * @param args the command line arguments
@@ -479,6 +574,7 @@ public class Room extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel boardGamePane;
     private javax.swing.JButton btnEndRoom;
+    private javax.swing.JButton btnSend;
     private javax.swing.JButton btnStartNewGame;
     private javax.swing.JPanel chatPane;
     private javax.swing.JButton jButton1;

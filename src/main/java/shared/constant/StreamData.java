@@ -28,6 +28,7 @@ public class StreamData {
         START_GAME,     //bat dau tro choi
         GAME_MOVE,      //tao nuoc di
         GAME_WIN,       //thong bao nguoi thang
+        CHAT,           //send chat
         UNKNOW_TYPE,
         NULL,
         SIGNAL_CLOSE,       //Close fd
