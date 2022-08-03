@@ -5,6 +5,7 @@
 package client.view.scene;
 
 import client.Client;
+import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
 
@@ -24,6 +25,21 @@ public class Menu extends javax.swing.JFrame {
         welcomeUser.setText("Hello " + user + "!");
         txIdRoom.setVisible(false);
         btnJoin.setVisible(false);
+        
+        // close window event
+        this.addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosing(java.awt.event.WindowEvent windowEvent) {
+                if (JOptionPane.showConfirmDialog(Menu.this,
+                        "This action will log out your account!", "Are you sure?",
+                        JOptionPane.YES_NO_OPTION,
+                        JOptionPane.QUESTION_MESSAGE) == JOptionPane.YES_OPTION)
+                {
+                    Client.socketHandler.logout(user);
+                }
+            }
+        });
+        this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
     }
 
     /**

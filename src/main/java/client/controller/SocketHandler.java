@@ -102,6 +102,10 @@ public class SocketHandler {
                         onReceiveJoinRoom(received);
                         break;
                         
+                    case LEAVE_ROOM:
+                        onReceiveLeaveRoom(received);
+                        break;
+                        
                     case START_GAME:
                         onReceiveStartGame(received);
                         break;
@@ -117,7 +121,7 @@ public class SocketHandler {
                     case NULL:
                         break;
 
-                    case EXIT:
+                    case SIGNAL_CLOSE:
                         running = false;
                         
                     default:
@@ -216,11 +220,24 @@ public class SocketHandler {
             opUser = (splitted[2].equals(user)) ? splitted[3] : splitted[2];
             String successMsg = (splitted[2].equals(user)) ? "You joined the room successfully!" : splitted[2] + " joined the room successfully!";
             userSymbol = (splitted[2].equals(user)) ? "o" : "x";
-            Client.closeAllScene();
-            Client.openScene(Client.SceneName.ROOM);
-            
+            if (splitted[2].equals(user)){
+                Client.closeScene(Client.SceneName.MENU);
+                Client.openScene(Client.SceneName.ROOM);
+            }
+            Client.roomScene.joinRoom();
             JOptionPane.showMessageDialog(Client.roomScene, successMsg, "Success", JOptionPane.INFORMATION_MESSAGE);
         }
+    }
+    
+    private void onReceiveLeaveRoom(String received) {
+        String[] splitted = received.split("#");
+        if (splitted[1].equals(opUser)){
+            opUser = null;
+        }
+        else {
+            opUser = null; roomId = null; userSymbol = null;
+        }
+        Client.roomScene.leaveRoom(splitted[1]);
     }
     
     private void onReceiveStartGame(String received) {
@@ -242,7 +259,7 @@ public class SocketHandler {
     
     private void onReceiveGameWin(String received){
         String[] splitted = received.split("#");
-        Client.roomScene.setWin(splitted[1]);
+        Client.roomScene.setWin(splitted);
     }
     
     private void showMenu() {
@@ -294,13 +311,26 @@ public class SocketHandler {
         sendData(data);
     }
     
+    public void leaveRoom(String user){
+        String data = StreamData.Type.LEAVE_ROOM.name() + "#" + user + "#" +roomId;
+        sendData(data);
+    }
+    
     public void startGame(String user) {
         String data = StreamData.Type.START_GAME.name() + "#" + user + "#" + roomId;
         sendData(data);
     }
     
     public void move(int row, int column, String user) {
-        sendData(StreamData.Type.GAME_MOVE + "#" + roomId + "#" + user +"#" + row + "#" + column);
+        sendData(StreamData.Type.GAME_MOVE.name() + "#" + roomId + "#" + user +"#" + row + "#" + column);
+    }
+    
+    public void close(){
+        sendData(StreamData.Type.SIGNAL_CLOSE.name());
+    }
+    
+    public void successConnect(){
+        sendData(StreamData.Type.SIGNAL_OK.name());
     }
     
     public void sendData(String data) {

@@ -92,7 +92,7 @@
     </Component>
     <Component class="javax.swing.JTextField" name="txIP">
       <Properties>
-        <Property name="text" type="java.lang.String" value="192.168.1.74"/>
+        <Property name="text" type="java.lang.String" value="192.168.1.94"/>
       </Properties>
       <AccessibilityProperties>
         <Property name="AccessibleContext.accessibleName" type="java.lang.String" value=""/>

@@ -5,11 +5,11 @@
 package client.view.scene;
 import client.Client;
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
 /**
@@ -25,11 +25,12 @@ public class Room extends javax.swing.JFrame {
     String user = Client.socketHandler.getUser();
     String opUser = Client.socketHandler.getOpUser();
     String roomID = Client.socketHandler.getRoom();
-    String userSymbol = Client.socketHandler.getSymbol();
+    String userSymbol;
     
     
     final int COLUMN = 16, ROW = 16;
     boolean turn = false; //false: wait, true: your turn
+    boolean statusGame = false; //ban co dang trong mot van game?
 
     JButton btnOnBoard[][];
     JButton lastMove = null;
@@ -42,36 +43,44 @@ public class Room extends javax.swing.JFrame {
         this.setLocationRelativeTo(null);
         this.setTitle("Caro Game - " + roomID);
         roomId.setText(roomID);
-        username.setText(user);
-        opUsername.setText(opUser);
+        username.setText(user); 
         
-        btnStartNewGame.setEnabled((opUser != null));
-        if (userSymbol != null){
-            if (userSymbol.equals("x")){
-                userIcon = new ImageIcon("src/main/java/img/cancel.png");
-                opUserIcon = new ImageIcon("src/main/java/img/circle.png");
-                userIconLastMove = new ImageIcon("src/main/java/img/cancel-lastmove.png");
-                opUserIconLastMove = new ImageIcon("src/main/java/img/circle-lastmove.png");
+        txtChat.setEditable(false);
+        
+        // close window event
+        this.addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosing(java.awt.event.WindowEvent windowEvent) {
+                if (statusGame){
+                    JOptionPane.showMessageDialog(Room.this, "You can't exit while playing a game!", "Unable", JOptionPane.INFORMATION_MESSAGE);
+                }
+                else {
+                    if (JOptionPane.showConfirmDialog(Room.this,
+                        "This action will let you leave this room!", "Are you sure?",
+                        JOptionPane.YES_NO_OPTION,
+                        JOptionPane.QUESTION_MESSAGE) == JOptionPane.YES_OPTION)
+                    {
+                        Client.socketHandler.leaveRoom(user);
+                    }
+                }
+                
             }
-            else {
-                opUserIcon = new ImageIcon("src/main/java/img/cancel.png");
-                userIcon = new ImageIcon("src/main/java/img/circle.png");
-                opUserIconLastMove = new ImageIcon("src/main/java/img/cancel-lastmove.png");
-                userIconLastMove = new ImageIcon("src/main/java/img/circle-lastmove.png");
-            }
-        }
-        
-        lbUserSymbol.setIcon(userIcon);
-        lbOpUserSymbol.setIcon(opUserIcon);
-        
-        //board
-        boardGamePane.setLayout(new GridLayout(ROW, COLUMN));
-        this.initBoard();
+        });
+        this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+    }
+    
+    
+    public void setOpUser(){
+        this.opUser = Client.socketHandler.getOpUser();
     }
     
     public void setTurn(boolean turn){
         this.turn = turn;
         System.out.println("Turn: " + this.turn);
+    }
+    
+    public void setStatusGame(boolean status){
+        this.statusGame = status;
     }
     
     public void initBoard() {
@@ -84,7 +93,8 @@ public class Room extends javax.swing.JFrame {
                 boardGamePane.add(btnOnBoard[column][row]);
             }
         }
-        boardGamePane.setEnabled(false);
+        boardGamePane.validate();
+        //boardGamePane.setEnabled(turn);
     }
     
     public JButton createBoardButton(int row, int column) {
@@ -155,7 +165,11 @@ public class Room extends javax.swing.JFrame {
     }
     
     public void startGame(){
+        this.setStatusGame(true);
         btnStartNewGame.setVisible(false);
+        //board
+        boardGamePane.setLayout(new GridLayout(ROW, COLUMN));
+        this.initBoard();
         this.setAllBoardButtonEnabled(turn);
     }
     
@@ -179,11 +193,63 @@ public class Room extends javax.swing.JFrame {
         this.setAllBoardButtonEnabled(turn);
     }
     
-    public void setWin(String user){
-        if (!user.equals(this.user)) {
-            if (user.equals(this.opUser))
+    public void setWin(String[] data){
+        String dataUser = data[1];
+        if (!dataUser.equals(this.user)) {
+            if (dataUser.equals(this.opUser)){
+                JOptionPane.showMessageDialog(this, "YOU LOSE.", "Lose", JOptionPane.INFORMATION_MESSAGE);
+            }
                 JOptionPane.showMessageDialog(this, "YOU LOSE.", "Lose", JOptionPane.INFORMATION_MESSAGE);
         } else JOptionPane.showMessageDialog(this, "YOU WIN!", "Win", JOptionPane.INFORMATION_MESSAGE);
+        
+        for (int i = 2; i <= 6; i++){
+            int cell = Integer.parseInt(data[i]);
+            int col = cell % COLUMN;
+            int row = cell / COLUMN;
+            this.btnOnBoard[col][row].setDisabledIcon(dataUser.equals(this.user) ? userIconLastMove : opUserIconLastMove);
+        }
+        btnStartNewGame.setVisible(true);
+        this.setAllBoardButtonEnabled(false);
+        this.setStatusGame(false);
+    }
+    
+    public void joinRoom(){
+        this.setOpUser();
+        opUsername.setText(opUser);
+        userSymbol = Client.socketHandler.getSymbol();
+        
+        btnStartNewGame.setEnabled((opUser != null));
+        if (userSymbol != null){
+            if (userSymbol.equals("x")){
+                userIcon = new ImageIcon("src/main/java/img/cancel.png");
+                opUserIcon = new ImageIcon("src/main/java/img/circle.png");
+                userIconLastMove = new ImageIcon("src/main/java/img/cancel-lastmove.png");
+                opUserIconLastMove = new ImageIcon("src/main/java/img/circle-lastmove.png");
+            }
+            else {
+                opUserIcon = new ImageIcon("src/main/java/img/cancel.png");
+                userIcon = new ImageIcon("src/main/java/img/circle.png");
+                opUserIconLastMove = new ImageIcon("src/main/java/img/cancel-lastmove.png");
+                userIconLastMove = new ImageIcon("src/main/java/img/circle-lastmove.png");
+            }
+        }
+        
+        lbUserSymbol.setIcon(userIcon);
+        lbOpUserSymbol.setIcon(opUserIcon);
+    }
+    
+    public void leaveRoom(String dataUser){
+        if (this.user.equals(dataUser)){
+            Client.closeScene(Client.SceneName.ROOM);
+            Client.openScene(Client.SceneName.MENU);
+            JOptionPane.showMessageDialog(Client.menuScene, "You have left the room successfully!", "OK", JOptionPane.INFORMATION_MESSAGE);
+        }
+        else {
+            this.setOpUser();
+            opUsername.setText(opUser);
+            btnStartNewGame.setEnabled(false);
+            JOptionPane.showMessageDialog(Client.menuScene, dataUser + " have left the room successfully!", "OK", JOptionPane.INFORMATION_MESSAGE);
+        }
     }
 
     /**
@@ -203,8 +269,8 @@ public class Room extends javax.swing.JFrame {
         opUsername = new javax.swing.JLabel();
         boardGamePane = new javax.swing.JPanel();
         chatPane = new javax.swing.JPanel();
-        jScrollPane1 = new javax.swing.JScrollPane();
-        txtChat = new javax.swing.JTextArea();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        txtChat = new javax.swing.JTextPane();
         txChatMessage = new javax.swing.JTextField();
         jButton1 = new javax.swing.JButton();
         btnEndRoom = new javax.swing.JButton();
@@ -229,9 +295,7 @@ public class Room extends javax.swing.JFrame {
 
         boardGamePane.setLayout(new java.awt.GridLayout(1, 0));
 
-        txtChat.setColumns(20);
-        txtChat.setRows(5);
-        jScrollPane1.setViewportView(txtChat);
+        jScrollPane2.setViewportView(txtChat);
 
         jButton1.setFont(new java.awt.Font("Liberation Sans", 0, 12)); // NOI18N
         jButton1.setText("SEND");
@@ -248,27 +312,28 @@ public class Room extends javax.swing.JFrame {
             .addGroup(chatPaneLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(chatPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 321, Short.MAX_VALUE)
+                    .addGroup(chatPaneLayout.createSequentialGroup()
+                        .addComponent(jScrollPane2)
+                        .addContainerGap())
                     .addGroup(chatPaneLayout.createSequentialGroup()
                         .addComponent(txChatMessage, javax.swing.GroupLayout.PREFERRED_SIZE, 242, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 1, Short.MAX_VALUE)
-                        .addGap(6, 6, 6)))
-                .addContainerGap())
+                        .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 61, Short.MAX_VALUE)
+                        .addGap(12, 12, 12))))
         );
         chatPaneLayout.setVerticalGroup(
             chatPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(chatPaneLayout.createSequentialGroup()
-                .addContainerGap(23, Short.MAX_VALUE)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 455, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
+                .addContainerGap()
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 484, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(chatPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(txChatMessage, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(19, 19, 19))
         );
 
-        btnEndRoom.setText("End Game");
+        btnEndRoom.setText("Leave Room");
         btnEndRoom.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnEndRoomActionPerformed(evt);
@@ -420,14 +485,14 @@ public class Room extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
-    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JLabel lbOpUserSymbol;
     private javax.swing.JLabel lbUserSymbol;
     private javax.swing.JLabel opUsername;
     private javax.swing.JLabel roomId;
     private javax.swing.JLabel timeLabel;
     private javax.swing.JTextField txChatMessage;
-    private javax.swing.JTextArea txtChat;
+    private javax.swing.JTextPane txtChat;
     private javax.swing.JLabel username;
     // End of variables declaration//GEN-END:variables
 }

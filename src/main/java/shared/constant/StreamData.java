@@ -17,18 +17,20 @@ public class StreamData {
         Tên type // mô tả / dữ liệu gửi đi từ client / dữ liệu trả về từ server
      */
     public enum Type {
+        SIGNAL_OK,          //connect server successfully
         SIGNAL_CHECKLOGIN, // chức năng đăng nhập / email, password / success hoặc failed
         SIGNAL_CREATEUSER, // chức năng đăng ký / thông tin đăng ký / success hoặc failed
         SIGNAL_MENU,      //show menu
         SIGNAL_LOGOUT, // chức năng đăng xuất / không cần dữ liệu thêm / success hoặc failed
         CREATE_ROOM,  //tao phong
         JOIN_ROOM,     //vao phong bang ID
+        LEAVE_ROOM,     //roi khoi room
         START_GAME,     //bat dau tro choi
         GAME_MOVE,      //tao nuoc di
         GAME_WIN,       //thong bao nguoi thang
         UNKNOW_TYPE,
         NULL,
-        EXIT
+        SIGNAL_CLOSE,       //Close fd
     }
     
     // https://stackoverflow.com/a/6667365
