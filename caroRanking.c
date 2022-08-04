@@ -87,19 +87,6 @@ caronode* checkUserCaro(char name[100]){// kiem tra user co trong list chua
   return NULL; // tra ve 0 la user chua ton tai
 }
 
-int getInforUserCaro(char name[100]){
-  caronode* infor = checkUserCaro(name);
-  if( infor != NULL){
-    // to-do
-    sprintf(inforCaroRankingOfUser,"%s#%d#%d#%d#%f", infor->user.username, infor->user.numberOfWin, infor->user.numberOfLose, infor->user.numberOfDraws, infor->user.point);
-    return 1;
-
-  }else{
-    // to-do
-    return -1;
-  }
-}
-
 // sort_by_point
 void sortCaroRanking(){
   caronode *p, *q;
@@ -114,45 +101,38 @@ void sortCaroRanking(){
       }
 }
 
-void displayNodeOfCaroRanking(caronode* p, int top, char id[100]){ // hien thi 1 node
-  if (p==NULL){
-    printf("Loi con tro NULL\n");
-    return; 
+/*
+update caro ranking
+*/
+void updateCaroRanking( char* user, int point, int status){
+  readFileCaroRanking();
+  caronode* tmp = checkUserCaro(user);
+  if(tmp == NULL ){ // user ko co trong danh sach
+    userInforCaro caroUser;
+    strcpy(caroUser.username, user);
+    caroUser.numberOfWin=0; caroUser.numberOfLose=0; caroUser.numberOfDraws=0; caroUser.point=0;
+    insertCaro(caroUser);
+    updateFileCaroRanking();
+    tmp = checkUserCaro(user);
   }
-  caronode* tmpNode = checkUserCaro(id);
-  userInforCaro tmp = p->user;
-  if( strcmp(tmp.username, tmpNode->user.username ) == 0){
-    printf("\033[0;33m%-5d%-20s%-10d%-10d%-10d%-10.1f\033[0;37m\n", top, tmp.username, tmp.numberOfWin, tmp.numberOfLose, tmp.numberOfDraws, tmp.point);
-  }else{
-    printf("\033[0;37m%-5d%-20s%-10d%-10d%-10d%-10.1f\n", top, tmp.username, tmp.numberOfWin, tmp.numberOfLose, tmp.numberOfDraws, tmp.point);
-  }
-}
+  
 
-void printfCaroRanking(char id[100]){ // duyet ca list
-  sortCaroRanking();
-  caronode* p;
-  int top = 1;
-  for ( p = caroroot; p!= NULL; p = p->next ){
-    displayNodeOfCaroRanking(p, top, id);
-    top++;
+  if( status == 1){ // 0 hòa, -1 thua, 1 thắng
+    tmp->user.numberOfWin++;
+    tmp->user.point += point;
+    updateFileCaroRanking();
   }
-}
+  else if ( status == -1){
+    tmp->user.numberOfLose++;
+    tmp->user.point += point;
+    updateFileCaroRanking();
+  }
+  else if ( status == 0 ){
+    tmp->user.numberOfDraws++;
+    tmp->user.point += point;
+    updateFileCaroRanking();
+  }
 
-void displayNodeOfCaroRankingNotID(caronode* p, int top){ // hien thi 1 node
-  if (p==NULL){
-    printf("Loi con tro NULL\n");
-    return; 
-  }
-  userInforCaro tmp = p->user;
-  printf("\033[0;37m%-5d%-20s%-10d%-10d%-10d%-10.1f\n", top, tmp.username, tmp.numberOfWin, tmp.numberOfLose, tmp.numberOfDraws, tmp.point);
-}
-
-void printfCaroRankingNotID(){ // duyet ca list
-  sortCaroRanking();
-  caronode* p;
-  int top = 1;
-  for ( p = caroroot; p!= NULL; p = p->next ){
-    displayNodeOfCaroRankingNotID(p, top);
-    top++;
-  }
+  // traversingListCaro();
+  caroroot = NULL; carocur = NULL; caronew = NULL; tmp = NULL;
 }

@@ -13,3 +13,5 @@ int getCell(int col, int row);
 check win(1)-lose(-1)-draw(0)
 */
 int checkWin(int* moveList, int* fd, int col, int row);
+
+int getNumberOfMove(int* moveList, int* fd);

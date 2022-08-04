@@ -36,10 +36,4 @@ int getInforUserCaro(char name[100]);
 
 void sortCaroRanking();
 
-void displayNodeOfCaroRanking(caronode* p, int top, char id[100]);
-
-void printfCaroRanking(char id[100]);
-
-void displayNodeOfCaroRankingNotID(caronode* p, int top);
-
-void printfCaroRankingNotID();
+void updateCaroRanking( char* user, int point, int status);  //1: win, 0: draw, -1: lose

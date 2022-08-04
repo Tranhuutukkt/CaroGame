@@ -3,6 +3,7 @@
 #include <time.h>
 #include "serverHelper.h"
 
+#define BUFF_SIZE 1024
 #define ROW_SIZE 16
 #define COL_SIZE 16
 
@@ -151,13 +152,12 @@ int isValid(char* username, char* password){
 /*
 Đăng kí user mới
 */
-void registerUser(char* username, char* password, int* fd){
+void registerUser(char* username, char* password){
   userProfile user;
   strcpy(user.username, username);
   strcpy(user.password, password);
-  strcpy(user.password, "null");
-  user.roomId[0] = '\0';
-  user.fd = *fd;
+  strcpy(user.roomId, "null");
+  user.fd = -1;
   insertUser(user);
   updateUserProfile();
 }
@@ -248,12 +248,24 @@ char* createRoomId(char* username){
 //save room
 void saveRoom(char* username, char* roomId){
   userNode* p = findUser(username);
-  if (roomId == NULL){
-    p->user.roomId == NULL;
-  }
-  else{
-    strcpy(p->user.roomId, roomId);
-  }
   
+  strcpy(p->user.roomId, roomId);
   updateUserProfile();
+}
+
+//get local time
+char* localTime(){
+  time_t rawtime;
+  struct tm * timeinfo;
+  static char output[BUFF_SIZE];
+  output[0] = '\0';
+  
+  time(&rawtime);
+  timeinfo = localtime(&rawtime);
+  
+  sprintf(
+    output, "[%d-%d-%d %d:%d:%d]",
+    timeinfo->tm_mday, timeinfo->tm_mon + 1, timeinfo->tm_year -100,
+    timeinfo->tm_hour, timeinfo->tm_min, timeinfo->tm_sec);
+  return output;
 }

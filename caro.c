@@ -98,4 +98,16 @@ int checkWin(int* moveList, int* fd, int col, int row){
     return -1; 
 }
 
+int getNumberOfMove(int* moveList, int* fd){
+    static int moveNumber;
+    moveNumber = 0;
+
+    int i;
+    for (i = 0; i < COL_SIZE*ROW_SIZE; i++){
+      if (*(moveList + i) == *fd) moveNumber++;
+    }
+
+    return moveNumber;
+}
+
 

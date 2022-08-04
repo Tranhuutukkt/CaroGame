@@ -16,6 +16,7 @@ Library of socket
 #include "checkinput.h"
 #include "caro.h"
 #include "serverHelper.h"
+#include "caroRanking.h"
 
 #define BUFF_SIZE 1024
 #define ROW_SIZE 16
@@ -41,22 +42,22 @@ Library of socket
 #define GAME_MOVE "GAME_MOVE"
 #define GAME_WIN "GAME_WIN"
 
+//set point
+#define SET_POINT "SET_POINT"
+
+//chat
+#define CHAT "CHAT"
+
 // caro ranking
-#define SIGNAL_CARO_RANKING "SIGNAL_CARO_RANKING"
-
-// tictactoe game
-#define SIGNAL_TICTACTOE "SIGNAL_TICTACTOE"
-#define SIGNAL_TTT_RESULT "SIGNAL_TTT_RESULT"
-#define SIGNAL_TICTACTOE_AI "SIGNAL_TICTACTOE_AI"
-
-// tictactoe ranking
-#define SIGNAL_TTT_RANKING "SIGNAL_TTT_RANKING"
+#define RANKING "RANKING"
+#define DETAIL "DETAIL"
+#define USER_INFO "USER_INFO"
 
 // server connect to client
 int PORT;
 struct sockaddr_in server_addr,client_addr;  
 fd_set master;
-char send_msg[BUFF_SIZE] , recv_msg[BUFF_SIZE];
+char send_msg[BUFF_SIZE], recv_msg[BUFF_SIZE];
 
 // server variable
 char token[] ="#";
@@ -66,7 +67,7 @@ char *str;
 Xử lí dữ liệu gửi từ client
 */
 int handleDataFromClient(int fd){
-  char *user, *pass, *roomId;
+  char *user, *pass, *roomId, *message, *time;
   int recieved, col, row;
   userProfile *userInfo;
   int* list;
@@ -92,7 +93,7 @@ int handleDataFromClient(int fd){
     if(isValid(user, NULL)){
       sprintf(send_msg,"%s#%s#%s\n", SIGNAL_CREATEUSER, "error", "Account existed");
     } else{
-      registerUser(user, pass, &fd);
+      registerUser(user, pass);
       sprintf( send_msg,"%s#%s\n", SIGNAL_CREATEUSER, "ok");
     }
 
@@ -149,7 +150,7 @@ int handleDataFromClient(int fd){
     list = checkRoom(roomId);
 
     if ( *(list)== 0 || *(list + 1) != 0){
-      sprintf( send_msg,"%s#%s#%s\n", JOIN_ROOM, "error", "This room is not avaiable!");
+      sprintf( send_msg,"%s#%s#%s\n", JOIN_ROOM, "error", "This room is not available!");
       write(fd, send_msg, strlen(send_msg));
     }
     else if (*(list)!= 0 && *(list + 1) == 0)
@@ -186,7 +187,6 @@ int handleDataFromClient(int fd){
     }
     printf("Send message: %s|\n", send_msg);
   }
-  
   else if (strcmp(str, START_GAME) == 0)
   {
     user = strtok(NULL, token);
@@ -196,6 +196,10 @@ int handleDataFromClient(int fd){
     sprintf( send_msg,"%s#%s\n", START_GAME, user);
     write(*(list + 0), send_msg, strlen(send_msg));
     write(*(list + 1), send_msg, strlen(send_msg));
+
+    char buf[11];
+    snprintf(buf, sizeof(buf), "%s.txt", roomId);
+    remove(buf);
   }
   else if (strcmp(str, GAME_MOVE) == 0)
   {
@@ -220,6 +224,65 @@ int handleDataFromClient(int fd){
       write(*(list + 0), send_msg, strlen(send_msg));
       write(*(list + 1), send_msg, strlen(send_msg));
     }
+  }
+  else if (strcmp(str, SET_POINT) == 0)
+  {
+    user = strtok(NULL, token);
+    roomId = strtok(NULL, token);
+    int status = atoi(strtok(NULL, token));
+    time = localTime();
+
+    moveList = getMoveList(roomId);
+    int moveNumber = getNumberOfMove(moveList, &fd);
+    float point = 0;
+    if (status == 1) point += (float)9 + (moveNumber/(COL_SIZE*ROW_SIZE));
+    else if (status == -1) point += (float)moveNumber/(COL_SIZE*ROW_SIZE);
+    else point += (float)9/2;
+    updateCaroRanking(user, point, status);
+
+    sprintf(send_msg,"%s#%s#%d#%.2f\n", SET_POINT, time, status, point);
+    write(fd, send_msg, strlen(send_msg));
+  }
+  
+  else if (strcmp(str, CHAT) == 0)
+  {
+    user = strtok(NULL, token);
+    roomId = strtok(NULL, token);
+    message = strtok(NULL, "\n");
+    time = localTime();
+
+    sprintf(send_msg, "%s#%s#%s#%s\n", CHAT, user, time, message);
+    list = checkRoom(roomId);
+    write(*(list + 0), send_msg, strlen(send_msg));
+    write(*(list + 1), send_msg, strlen(send_msg));
+    printf("Send message: %s|\n", send_msg);
+  }
+  else if (strcmp(str, RANKING) == 0)
+  {
+    user = strtok(NULL, token);
+
+    caroroot = NULL; carocur = NULL; caronew = NULL;
+    readFileCaroRanking();
+
+    caronode* p;
+    p = checkUserCaro(user);
+
+    if (p == NULL){
+      sprintf(send_msg, "%s#%d#%d#%d#%.2f\n", USER_INFO, 0, 0, 0, 0.0);
+      write(fd, send_msg, strlen(send_msg));
+    }
+    else {
+      sprintf(send_msg, "%s#%d#%d#%d#%.2f\n", USER_INFO, p->user.numberOfWin, p->user.numberOfDraws, p->user.numberOfLose, p->user.point);
+      write(fd, send_msg, strlen(send_msg));
+    }
+
+    int i = 0;
+    for ( p = caroroot; p!= NULL; p = p->next ){
+      sprintf(send_msg, "%s#%d#%s#%d#%d#%d#%.2f\n", RANKING, ++i, p->user.username, p->user.numberOfWin, p->user.numberOfDraws, p->user.numberOfLose, p->user.point);
+      write(fd, send_msg, strlen(send_msg));
+      sleep(0.75);
+    }
+
   }
   
 }

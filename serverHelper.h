@@ -42,7 +42,7 @@ int isValid(char* username, char* password);
 /*
 Đăng kí user mới
 */
-void registerUser(char* username, char* password, int* fd);
+void registerUser(char* username, char* password);
 
 /*
 Cap nhat khi login
@@ -69,3 +69,6 @@ char* createRoomId(char* username);
 
 //save room
 void saveRoom(char* username, char* roomId);
+
+//get local time
+char* localTime();
