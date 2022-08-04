@@ -28,7 +28,10 @@ public class StreamData {
         START_GAME,     //bat dau tro choi
         GAME_MOVE,      //tao nuoc di
         GAME_WIN,       //thong bao nguoi thang
+        SET_POINT,       //caculate point
         CHAT,           //send chat
+        RANKING,        //leaderboard
+        USER_INFO,       //user info in leaderboard
         UNKNOW_TYPE,
         NULL,
         SIGNAL_CLOSE,       //Close fd

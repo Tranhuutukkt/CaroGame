@@ -7,9 +7,6 @@ package client.controller;
 import client.Client;
 import java.io.*;
 import java.net.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JOptionPane;
@@ -118,8 +115,21 @@ public class SocketHandler {
                         onReceiveGameWin(received);
                         break;
                         
+                    case SET_POINT:
+                        onReceiveSetPoint(received);
+                        break;
+                        
                     case CHAT:
                         onReceiveChat(received);
+                        break;
+                    
+                    case RANKING:
+                        onReceiveRank(received);
+                        break;
+                    
+                    case USER_INFO:
+                        onReceiveUserInfo(received);
+                        break;
                         
                     case NULL:
                         break;
@@ -266,8 +276,25 @@ public class SocketHandler {
     }
     
     private void onReceiveChat(String received){
-        String[] splitted = received.split("#");
+        String[] splitted = received.split("#", 4);
         Client.roomScene.addChat(splitted);
+    }
+    
+    private void onReceiveSetPoint(String received){
+        String[] splitted = received.split("#");
+        Client.roomScene.setPoint(splitted);
+    }
+    
+    private void onReceiveUserInfo(String received){
+        String[] splitted = received.split("#");
+        Client.openScene(Client.SceneName.LEADERBOARD);
+        Client.leaderboardScene.setUserInfo(splitted);
+    }
+    
+    private void onReceiveRank(String received){
+        String[] splitted = received.split("#");
+        Client.leaderboardScene.setLeaderboard(splitted, this.user);
+        
     }
     
     private void showMenu() {
@@ -334,7 +361,15 @@ public class SocketHandler {
     }
     
     public void sendChat(String message, String user, String roomId){
-        sendData(StreamData.Type.CHAT.name() + "#" + user + "#" + roomId + "#" + message);
+        sendData(StreamData.Type.CHAT.name() + "#" + user + "#" + roomId + "#" + message + "\n");
+    }
+    
+    public void viewRank(String user){
+        sendData(StreamData.Type.RANKING + "#" + user);
+    }
+    
+    public void setPoint(String user, String roomId, int status){
+        sendData(StreamData.Type.SET_POINT + "#" + user + "#" + roomId + "#" + status);
     }
     
     public void close(){

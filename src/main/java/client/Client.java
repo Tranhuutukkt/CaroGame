@@ -12,6 +12,7 @@ import client.view.scene.Login;
 import client.view.scene.Signup;
 import client.view.scene.Menu;
 import client.view.scene.Room;
+import client.view.scene.Leaderboard;
 
 
 public class Client {
@@ -21,7 +22,8 @@ public class Client {
         LOGIN,
         SIGNUP,
         MENU,
-        ROOM
+        ROOM,
+        LEADERBOARD
     }
 
     // scenes
@@ -30,6 +32,7 @@ public class Client {
     public static Signup signupScene;
     public static Menu menuScene;
     public static Room roomScene;
+    public static Leaderboard leaderboardScene;
 
     // controller 
     public static SocketHandler socketHandler;
@@ -46,6 +49,7 @@ public class Client {
         signupScene = new Signup();
         menuScene = new Menu();
         roomScene = new Room();
+        leaderboardScene = new Leaderboard();
     }
 
     public static void openScene(SceneName sceneName) {
@@ -73,6 +77,10 @@ public class Client {
                     roomScene = new Room();
                     roomScene.setVisible(true);
                     break;
+                case LEADERBOARD:
+                    leaderboardScene = new Leaderboard();
+                    leaderboardScene.setVisible(true);
+                    break;
                 default:
                     break;
             }
@@ -97,6 +105,9 @@ public class Client {
                 case ROOM:
                     roomScene.dispose();
                     break;
+                case LEADERBOARD:
+                    leaderboardScene.dispose();
+                    break;
                 default:
                     break;
             }
@@ -109,6 +120,7 @@ public class Client {
         signupScene.dispose();
         menuScene.dispose();
         roomScene.dispose();
+        leaderboardScene.dispose();
     }
 
     public static void main(String[] args) {
