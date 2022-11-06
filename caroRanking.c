@@ -61,16 +61,18 @@ void readFileCaroRanking(){
   while(!feof(f)){
     // dinh dang file: username win lose draw point
     fscanf(f, "%s %d %d %d %f\n", user.username, &user.numberOfWin, &user.numberOfLose, &user.numberOfDraws, &user.point);
+    printf("%s - %d - %d - %d - %f\n", user.username, user.numberOfWin, user.numberOfLose, user.numberOfDraws, user.point);
     insertCaro(user);
     if(feof(f)) break;
   }
 }
 
 void updateFileCaroRanking(){
+  sortCaroRanking();
   FILE *f = fopen("caroRanking.txt", "w");
   caronode* p;
   for ( p = caroroot; p!= NULL; p = p->next ){
-    fprintf(f, "%s %d %d %d %.1f\n", p->user.username, p->user.numberOfWin, p->user.numberOfLose, p->user.numberOfDraws, p->user.point);
+    fprintf(f, "%s %d %d %d %.2f\n", p->user.username, p->user.numberOfWin, p->user.numberOfLose, p->user.numberOfDraws, p->user.point);
   }
   fclose(f);
 }
@@ -104,13 +106,12 @@ void sortCaroRanking(){
 /*
 update caro ranking
 */
-void updateCaroRanking( char* user, int point, int status){
-  readFileCaroRanking();
+void updateCaroRanking( char* user, float point, int status){
   caronode* tmp = checkUserCaro(user);
   if(tmp == NULL ){ // user ko co trong danh sach
     userInforCaro caroUser;
     strcpy(caroUser.username, user);
-    caroUser.numberOfWin=0; caroUser.numberOfLose=0; caroUser.numberOfDraws=0; caroUser.point=0;
+    caroUser.numberOfWin=0; caroUser.numberOfLose=0; caroUser.numberOfDraws=0; caroUser.point=0.0;
     insertCaro(caroUser);
     updateFileCaroRanking();
     tmp = checkUserCaro(user);
@@ -133,6 +134,8 @@ void updateCaroRanking( char* user, int point, int status){
     updateFileCaroRanking();
   }
 
+  
+
   // traversingListCaro();
-  caroroot = NULL; carocur = NULL; caronew = NULL; tmp = NULL;
+  //caroroot = NULL; carocur = NULL; caronew = NULL; tmp = NULL;
 }

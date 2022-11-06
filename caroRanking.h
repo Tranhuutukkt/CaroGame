@@ -36,4 +36,4 @@ int getInforUserCaro(char name[100]);
 
 void sortCaroRanking();
 
-void updateCaroRanking( char* user, int point, int status);  //1: win, 0: draw, -1: lose
+void updateCaroRanking( char* user, float point, int status);  //1: win, 0: draw, -1: lose

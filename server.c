@@ -234,9 +234,10 @@ int handleDataFromClient(int fd){
 
     moveList = getMoveList(roomId);
     int moveNumber = getNumberOfMove(moveList, &fd);
+    printf("Move: %d", moveNumber);
     float point = 0;
-    if (status == 1) point += (float)9 + (moveNumber/(COL_SIZE*ROW_SIZE));
-    else if (status == -1) point += (float)moveNumber/(COL_SIZE*ROW_SIZE);
+    if (status == 1) point += (float)(9 + (moveNumber*0.01));
+    else if (status == -1) point += (float)moveNumber*0.01;
     else point += (float)9/2;
     updateCaroRanking(user, point, status);
 
@@ -261,14 +262,11 @@ int handleDataFromClient(int fd){
   {
     user = strtok(NULL, token);
 
-    caroroot = NULL; carocur = NULL; caronew = NULL;
-    readFileCaroRanking();
-
     caronode* p;
     p = checkUserCaro(user);
 
     if (p == NULL){
-      sprintf(send_msg, "%s#%d#%d#%d#%.2f\n", USER_INFO, 0, 0, 0, 0.0);
+      sprintf(send_msg, "%s#%d#%d#%d#%.2f\n", USER_INFO, 0, 0, 0, (float)0.00);
       write(fd, send_msg, strlen(send_msg));
     }
     else {
@@ -307,7 +305,9 @@ int main(int argc, char *argv[]){
   FD_ZERO(&read_fds);
   initList();
   userRoot = NULL; userCur = NULL; userNew = NULL;
+  caroroot = NULL; carocur = NULL; caronew = NULL;
   readFileUser();
+  readFileCaroRanking();
   
   // Step 1: Construct a TCP socket to listen connection request
   if((sock = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
