@@ -5,8 +5,8 @@
   - Đăng nhập
   - Tạo phòng
   - Vào phòng bằng Id
-  - Chơi game caro (not completed)
-  - Xem bảng xếp hạng (not completed)
+  - Chơi game caro
+  - Xem bảng xếp hạng
 # Công nghệ sử dụng
   - Kết nối bằng giao thức TCP
   - Nhiều client cùng kết nối với server sử dụng select()
@@ -19,5 +19,3 @@
 2. Tìm file Client.java trong folder src
 3. Click phải chuột -> Run file.
 ---
-** Báo cáo**
-* Slide + Report: not available
